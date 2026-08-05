@@ -1,0 +1,16 @@
+name: flutter_design_guard
+description: Custom lint rules for Flutter that enforce design-system widgets, theme colors, typography, spacing, and UI standards.
+publish_to: none
+
+environment:
+  sdk: ">=3.9.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  custom_lint: ^0.8.1
+
+  flutter_design_guard:
+    path: ../
