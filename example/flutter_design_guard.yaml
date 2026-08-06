@@ -1,0 +1,3 @@
+rules:
+  avoid_native_text_field:
+    replacement: AppField

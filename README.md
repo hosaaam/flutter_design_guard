@@ -1,160 +1,153 @@
 # Flutter Design Guard
 
-Custom lint rules that help Flutter teams enforce their design system directly
-inside the IDE and CI.
+Analyzer plugin for enforcing Flutter design-system components directly in the
+IDE, `dart analyze`, `flutter analyze`, and CI.
 
-The first rule prevents direct usage of Flutter's native `TextField` and
-`TextFormField` widgets and recommends using `CustomTextField` instead.
+The first rule prevents direct usage of Flutter Material `TextField` and
+`TextFormField`, and recommends the project’s configured replacement widget.
 
 ## Features
 
-- Reports warnings directly inside supported IDEs.
-- Detects Flutter's native `TextField`.
-- Detects Flutter's native `TextFormField`.
-- Recommends using the project's approved design-system component.
-- Can run locally and in CI.
-- Does not affect the application's runtime or production bundle.
+- Detects Flutter Material `TextField` and `TextFormField`.
+- Uses semantic analysis to avoid false positives from local classes.
+- Supports a configurable replacement widget.
+- Supports allowed implementation files.
+- Allows native fields inside the replacement class.
+- Has no runtime or production-bundle impact.
 
-## Installation
+## Setup
 
-Add `flutter_design_guard` and `custom_lint` to your Flutter application's
-`dev_dependencies`:
+Enable the plugin in the consuming project’s `analysis_options.yaml`:
 
 ```yaml
-dev_dependencies:
-  custom_lint: ^0.8.1
-  flutter_design_guard: ^0.0.1
+include: package:flutter_lints/flutter.yaml
+
+plugins:
+  flutter_design_guard:
+    path: ../flutter_design_guard
+    diagnostics:
+      avoid_native_text_field: true
 ```
 
-Install the dependencies:
-
-```bash
-flutter pub get
-```
-
-This package is a development tool. You do not need to import it into your
-application's Dart files.
+Restart the Dart Analysis Server after changing the plugin configuration.
 
 ## Configuration
 
-Enable `custom_lint` in your application's `analysis_options.yaml`:
+Create `flutter_design_guard.yaml` next to the consuming project’s
+`pubspec.yaml`:
 
 ```yaml
-analyzer:
-  plugins:
-    - custom_lint
+rules:
+  avoid_native_text_field:
+    replacement: AppField
+    implementation_paths:
+      - lib/core/widgets/app_field.dart
+      - lib/core/widgets/text_field_helper.dart
 ```
 
-To explicitly enable only the required rules:
+| Option                 | Description                                          | Default           |
+|------------------------|------------------------------------------------------|-------------------|
+| `replacement`          | Widget developers should use instead.                | `CustomTextField` |
+| `implementation_paths` | Package-relative files allowed to use native fields. | `[]`              |
 
-```yaml
-analyzer:
-  plugins:
-    - custom_lint
-
-custom_lint:
-  enable_all_lint_rules: false
-  rules:
-    - avoid_native_text_field
-```
+Invalid or missing configuration falls back to safe defaults.
 
 ## Usage
 
-The following code reports a warning:
+This produces analyzer warnings:
 
 ```dart
-TextField();
-
-TextFormField();
+const TextField
+();const TextFormField
+();
 ```
 
-The reported warning is:
+Example diagnostic:
 
 ```text
-Do not use TextField or TextFormField directly.
-Use CustomTextField instead.
-
-avoid_native_text_field • WARNING
+Do not use TextField directly. Use AppField instead.
 ```
 
-Use the approved design-system component instead:
+Use the configured design-system widget:
 
 ```dart
-CustomTextField();
+const AppField
+();
 ```
 
-## Command-line usage
+## Allowed usages
 
-Run the standard Dart analyzer:
+Native text fields are allowed inside the configured replacement class:
 
-```bash
-dart analyze
+```dart
+class AppField {
+  const AppField();
+
+  Object build() {
+    return const TextField();
+  }
+}
 ```
 
-Run Flutter Design Guard rules:
+They are also allowed inside files listed in `implementation_paths`.
 
-```bash
-dart run custom_lint
+A local class with the same name does not produce a false warning:
+
+```dart
+class TextField {
+  const TextField();
+}
+
+void build() {
+  const TextField();
+}
 ```
 
-## CI usage
+## Ignoring a diagnostic
 
-Example GitHub Actions steps:
-
-```yaml
-- name: Install dependencies
-  run: flutter pub get
-
-- name: Check formatting
-  run: dart format --output=none --set-exit-if-changed .
-
-- name: Run Dart analyzer
-  run: dart analyze
-
-- name: Run Flutter Design Guard
-  run: dart run custom_lint
-```
-
-## Ignoring a warning
-
-Ignore one occurrence:
+For exceptional cases:
 
 ```dart
 // ignore: avoid_native_text_field
-final field = TextField();
+const field = TextField();
 ```
 
-Ignore the rule for an entire file:
+For an entire file:
 
 ```dart
 // ignore_for_file: avoid_native_text_field
 ```
 
-Use ignores only for exceptional cases, such as implementing the approved
-design-system component itself.
+Prefer `implementation_paths` for design-system implementation files.
+
+## Commands
+
+```bash
+dart test
+dart analyze
+```
+
+For a consuming Flutter project:
+
+```bash
+flutter analyze
+```
+
+No separate lint command is required.
 
 ## Available rules
 
 ### `avoid_native_text_field`
 
-Reports a warning when Flutter's native `TextField` or `TextFormField` is used
-directly.
+Prevents direct usage of Flutter Material:
 
-## Documentation
-
-See the [complete usage guide](doc/USAGE.md) for IDE setup, CI integration,
-troubleshooting, and additional examples.
+- `TextField`
+- `TextFormField`
 
 ## Roadmap
 
-Future releases are planned to include rules for:
-
-- Native Flutter buttons.
-- Hardcoded colors outside theme definitions.
-- Inline text styles.
-- Design-system spacing and radius tokens.
-- Native dialogs, snackbars, and loading indicators.
-- Configurable replacements and excluded paths.
+Future rules may cover buttons, dialogs, colors, typography, spacing, icons,
+checkboxes, switches, and other design-system components.
 
 ## License
 

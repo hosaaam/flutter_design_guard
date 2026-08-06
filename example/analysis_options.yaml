@@ -1,8 +1,7 @@
-analyzer:
-  plugins:
-    - custom_lint
+include: package:flutter_lints/flutter.yaml
 
-custom_lint:
-  enable_all_lint_rules: false
-  rules:
-    - avoid_native_text_field
+plugins:
+  flutter_design_guard:
+    path: ../
+    diagnostics:
+      avoid_native_text_field: true
