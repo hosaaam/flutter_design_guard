@@ -1,19 +1,19 @@
 name: flutter_design_guard
-description: Analyzer plugin rules for enforcing Flutter design-system widgets, colors, typography, spacing, and UI standards.
-version: 0.1.0-dev.1
+description: A modern Dart analysis server plugin for enforcing Flutter design-system rules in Flutter projects.
+version: 0.1.0
 
 repository: https://github.com/hosaaam/flutter_design_guard
 issue_tracker: https://github.com/hosaaam/flutter_design_guard/issues
 
-topics:
-  - flutter
-  - analyzer-plugin
-  - static-analysis
-  - design-system
-  - lints
-
 environment:
   sdk: ">=3.11.0 <4.0.0"
+
+topics:
+  - analyzer
+  - flutter
+  - lints
+  - static-analysis
+  - code-quality
 
 dependencies:
   analysis_server_plugin: ^0.3.20

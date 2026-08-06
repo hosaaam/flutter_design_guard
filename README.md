@@ -1,155 +1,169 @@
 # Flutter Design Guard
 
-Analyzer plugin for enforcing Flutter design-system components directly in the
-IDE, `dart analyze`, `flutter analyze`, and CI.
+A Dart analyzer plugin that helps Flutter teams enforce design-system
+components by preventing direct use of native text fields.
 
-The first rule prevents direct usage of Flutter Material `TextField` and
-`TextFormField`, and recommends the project’s configured replacement widget.
+The first stable release provides the `avoid_native_text_field` diagnostic,
+which detects direct usage of Flutter's `TextField` and `TextFormField`.
 
-## Features
+## Requirements
 
-- Detects Flutter Material `TextField` and `TextFormField`.
-- Uses semantic analysis to avoid false positives from local classes.
-- Supports a configurable replacement widget.
-- Supports allowed implementation files.
-- Allows native fields inside the replacement class.
-- Has no runtime or production-bundle impact.
+- Dart SDK 3.11 or newer.
+- A Flutter project using the modern Dart analyzer plugin system.
+- The plugin must be configured in the root `analysis_options.yaml` file.
 
-## Setup
+## Installation
 
-Enable the plugin in the consuming project’s `analysis_options.yaml`:
+Add the plugin to the top-level `plugins` section of your project's root
+`analysis_options.yaml` file:
 
 ```yaml
-include: package:flutter_lints/flutter.yaml
-
 plugins:
   flutter_design_guard:
-    path: ../flutter_design_guard
+    version: ^0.1.0
     diagnostics:
       avoid_native_text_field: true
 ```
 
-Restart the Dart Analysis Server after changing the plugin configuration.
+Do not place `plugins` under the `analyzer` section.
 
-## Configuration
+You don't need to add `flutter_design_guard` to your application's
+`pubspec.yaml`. Analyzer plugins are resolved separately by the Dart Analysis
+Server.
 
-Create `flutter_design_guard.yaml` next to the consuming project’s
-`pubspec.yaml`:
+After adding or changing the plugin configuration, restart the Dart Analysis
+Server.
 
-```yaml
-rules:
-  avoid_native_text_field:
-    replacement: AppField
-    implementation_paths:
-      - lib/core/widgets/app_field.dart
-      - lib/core/widgets/text_field_helper.dart
+### Visual Studio Code
+
+Open the command palette and run:
+
+```text
+Dart: Restart Analysis Server
 ```
 
-| Option                 | Description                                          | Default           |
-|------------------------|------------------------------------------------------|-------------------|
-| `replacement`          | Widget developers should use instead.                | `CustomTextField` |
-| `implementation_paths` | Package-relative files allowed to use native fields. | `[]`              |
+### Android Studio or IntelliJ IDEA
 
-Invalid or missing configuration falls back to safe defaults.
+Use:
+
+```text
+File > Invalidate Caches / Restart
+```
+
+You can also restart the IDE.
 
 ## Usage
 
-This produces analyzer warnings:
-
-```dart
-const TextField
-();const TextFormField
-();
-```
-
-Example diagnostic:
-
-```text
-Do not use TextField directly. Use AppField instead.
-```
-
-Use the configured design-system widget:
-
-```dart
-const AppField
-();
-```
-
-## Allowed usages
-
-Native text fields are allowed inside the configured replacement class:
-
-```dart
-class AppField {
-  const AppField();
-
-  Object build() {
-    return const TextField();
-  }
-}
-```
-
-They are also allowed inside files listed in `implementation_paths`.
-
-A local class with the same name does not produce a false warning:
-
-```dart
-class TextField {
-  const TextField();
-}
-
-void build() {
-  const TextField();
-}
-```
-
-## Ignoring a diagnostic
-
-For exceptional cases:
-
-```dart
-// ignore: avoid_native_text_field
-const field = TextField();
-```
-
-For an entire file:
-
-```dart
-// ignore_for_file: avoid_native_text_field
-```
-
-Prefer `implementation_paths` for design-system implementation files.
-
-## Commands
-
-```bash
-dart test
-dart analyze
-```
-
-For a consuming Flutter project:
+After enabling the diagnostic, run:
 
 ```bash
 flutter analyze
 ```
 
-No separate lint command is required.
+You can also use:
 
-## Available rules
+```bash
+dart analyze
+```
+
+The diagnostic also appears directly in supported editors.
+
+## Available diagnostics
 
 ### `avoid_native_text_field`
 
-Prevents direct usage of Flutter Material:
+Prevents direct usage of Flutter's native `TextField` and `TextFormField`
+widgets.
 
-- `TextField`
-- `TextFormField`
+This helps projects consistently use their own design-system field component.
 
-## Roadmap
+#### Invalid
 
-Future rules may cover buttons, dialogs, colors, typography, spacing, icons,
-checkboxes, switches, and other design-system components.
+```dart
+import 'package:flutter/material.dart';
 
-## License
+class LoginForm extends StatelessWidget {
+  const LoginForm({super.key});
 
-Flutter Design Guard is available under the BSD 3-Clause License.
-See [LICENSE](LICENSE).
+  @override
+  Widget build(BuildContext context) {
+    return const TextField();
+  }
+}
+```
+
+```dart
+import 'package:flutter/material.dart';
+
+class ProfileForm extends StatelessWidget {
+  const ProfileForm({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const TextFormField();
+  }
+}
+```
+
+The analyzer reports:
+
+```text
+Do not use TextField directly. Use your design-system text field instead.
+```
+
+#### Valid
+
+Use the text-field component provided by your application or design system:
+
+```dart
+import 'package:flutter/material.dart';
+
+class AppTextField extends StatelessWidget {
+  const AppTextField({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox();
+  }
+}
+```
+
+```dart
+class LoginForm extends StatelessWidget {
+  const LoginForm({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppTextField();
+  }
+}
+```
+
+## Disabling the diagnostic
+
+To disable the rule while keeping the plugin installed:
+
+```yaml
+plugins:
+  flutter_design_guard:
+    version: ^0.1.0
+    diagnostics:
+      avoid_native_text_field: false
+```
+
+## Suppressing a diagnostic
+
+Suppress one occurrence:
+
+```dart
+// ignore: flutter_design_guard/avoid_native_text_field
+final field = TextField();
+```
+
+Suppress the diagnostic for an entire file:
+
+```dart
+// ignore_for_file: flutter_design_guard/avoid_native_text_field
+```
+
+Suppress

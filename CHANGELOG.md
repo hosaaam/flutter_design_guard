@@ -1,4 +1,20 @@
-## 0.1.0-dev.1 - 2026-08-06
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+## 0.1.0
+
+- First stable release.
+- Migrated to Dart's official analyzer plugin system.
+- Added the `avoid_native_text_field` diagnostic.
+- Detects direct usage of Flutter's `TextField`.
+- Detects direct usage of Flutter's `TextFormField`.
+- Allows projects to enforce using a custom design-system text field.
+- Added analyzer tests for valid and invalid widget usage.
+- Added configuration and installation documentation.
+- Verified support through `dart analyze` and `flutter analyze`.
+
+## 0.1.0-dev.1
 
 - Added the official Dart analyzer plugin entry point.
 - Added the `avoid_native_text_field` diagnostic.
