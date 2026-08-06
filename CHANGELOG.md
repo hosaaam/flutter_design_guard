@@ -1,6 +1,13 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable changes to this project will be documented in this file.
+
+## 0.1.1
+
+- Updated installation to use the official Dart Analyzer Plugin configuration.
+- Installation now requires only `analysis_options.yaml`.
+- Improved README with clearer installation, configuration, and usage examples.
+- Clarified configuration options and diagnostics.
 
 ## 0.1.0
 
@@ -18,8 +25,7 @@ All notable changes to this project are documented in this file.
 
 - Added the official Dart analyzer plugin entry point.
 - Added the `avoid_native_text_field` diagnostic.
-- Added semantic detection for Flutter Material `TextField` and
-  `TextFormField`.
+- Added semantic detection for Flutter Material `TextField` and `TextFormField`.
 - Added configurable replacement widget names.
 - Added allowed implementation paths.
 - Allowed native text fields inside the configured replacement class.
