@@ -14,6 +14,10 @@ rules:
       - lib/widgets/app_field.dart
       - " lib/widgets/text_field_helper.dart "
       - lib/widgets/app_field.dart
+  avoid_hardcoded_color:
+    replacement: DesignColors
+    implementation_paths:
+      - lib/theme/design_colors.dart
 ''');
 
       final ruleConfig = config.avoidNativeTextField;
@@ -22,6 +26,10 @@ rules:
       expect(ruleConfig.implementationPaths, [
         'lib/widgets/app_field.dart',
         'lib/widgets/text_field_helper.dart',
+      ]);
+      expect(config.avoidHardcodedColor.replacement, 'DesignColors');
+      expect(config.avoidHardcodedColor.implementationPaths, [
+        'lib/theme/design_colors.dart',
       ]);
     });
 
@@ -32,6 +40,8 @@ rules:
 
       expect(ruleConfig.replacement, 'CustomTextField');
       expect(ruleConfig.implementationPaths, isEmpty);
+      expect(config.avoidHardcodedColor.replacement, 'AppColors');
+      expect(config.avoidHardcodedColor.implementationPaths, isEmpty);
     });
 
     test('uses safe defaults when values have invalid types', () {
@@ -40,12 +50,17 @@ rules:
   avoid_native_text_field:
     replacement: 42
     implementation_paths: invalid
+  avoid_hardcoded_color:
+    replacement: []
+    implementation_paths: invalid
 ''');
 
       final ruleConfig = config.avoidNativeTextField;
 
       expect(ruleConfig.replacement, 'CustomTextField');
       expect(ruleConfig.implementationPaths, isEmpty);
+      expect(config.avoidHardcodedColor.replacement, 'AppColors');
+      expect(config.avoidHardcodedColor.implementationPaths, isEmpty);
     });
   });
 }

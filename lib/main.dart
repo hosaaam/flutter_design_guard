@@ -1,5 +1,6 @@
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
+import 'package:flutter_design_guard/src/rules/avoid_hardcoded_color.dart';
 import 'package:flutter_design_guard/src/rules/avoid_native_text_field_rule.dart';
 
 /// Entry point loaded by the Dart Analysis Server.
@@ -13,5 +14,6 @@ final class FlutterDesignGuardPlugin extends Plugin {
   @override
   void register(PluginRegistry registry) {
     registry.registerLintRule(AvoidNativeTextFieldRule());
+    registry.registerLintRule(AvoidHardcodedColorRule());
   }
 }

@@ -5,3 +5,4 @@ plugins:
     path: ../
     diagnostics:
       avoid_native_text_field: true
+      avoid_hardcoded_color: true

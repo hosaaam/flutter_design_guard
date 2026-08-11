@@ -15,39 +15,71 @@ final class FlutterDesignGuardConfigParser {
     }
 
     final rules = document['rules'];
+
     if (rules is! YamlMap) {
       return FlutterDesignGuardConfig();
     }
 
-    final rawRule = rules['avoid_native_text_field'];
-    if (rawRule is! YamlMap) {
-      return FlutterDesignGuardConfig();
-    }
+    return FlutterDesignGuardConfig(
+      avoidNativeTextField: _parseNativeTextFieldRule(
+        rules['avoid_native_text_field'],
+      ),
+      avoidHardcodedColor: _parseHardcodedColorRule(
+        rules['avoid_hardcoded_color'],
+      ),
+    );
+  }
 
+  AvoidNativeTextFieldConfig _parseNativeTextFieldRule(Object? value) {
     final defaults = AvoidNativeTextFieldConfig();
 
-    return FlutterDesignGuardConfig(
-      avoidNativeTextField: AvoidNativeTextFieldConfig(
-        replacement: _readReplacement(
-          rawRule['replacement'],
-          fallback: defaults.replacement,
-        ),
-        implementationPaths: _readImplementationPaths(
-          rawRule['implementation_paths'],
-        ),
+    if (value is! YamlMap) {
+      return defaults;
+    }
+
+    return AvoidNativeTextFieldConfig(
+      replacement: _readReplacement(
+        value['replacement'],
+        fallback: defaults.replacement,
+      ),
+      implementationPaths: _readImplementationPaths(
+        value['implementation_paths'],
+      ),
+    );
+  }
+
+  AvoidHardcodedColorConfig _parseHardcodedColorRule(Object? value) {
+    final defaults = AvoidHardcodedColorConfig();
+
+    if (value is! YamlMap) {
+      return defaults;
+    }
+
+    return AvoidHardcodedColorConfig(
+      replacement: _readReplacement(
+        value['replacement'],
+        fallback: defaults.replacement,
+      ),
+      implementationPaths: _readImplementationPaths(
+        value['implementation_paths'],
       ),
     );
   }
 
   String _readReplacement(Object? value, {required String fallback}) {
-    if (value is! String) return fallback;
+    if (value is! String) {
+      return fallback;
+    }
 
     final replacement = value.trim();
+
     return replacement.isEmpty ? fallback : replacement;
   }
 
   List<String> _readImplementationPaths(Object? value) {
-    if (value is! YamlList) return const [];
+    if (value is! YamlList) {
+      return const [];
+    }
 
     return value
         .whereType<String>()

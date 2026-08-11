@@ -1,98 +1,73 @@
 # Flutter Design Guard
 
-A Dart Analysis Server plugin that helps enforce your Flutter design system by reporting the usage of forbidden Flutter widgets and suggesting your project's custom replacements.
+A Dart Analyzer plugin that keeps Flutter UI code aligned with your design
+system in the IDE, `dart analyze`, and `flutter analyze`.
 
-## Features
+## What it guards
 
-- ✅ Detects direct usage of `TextField`
-- ✅ Detects direct usage of `TextFormField`
-- ✅ Supports configurable replacement widgets
-- ✅ Supports allowing implementation files
-- ✅ Runs automatically during `dart analyze` and `flutter analyze`
+- `avoid_native_text_field` — reports direct `TextField` and `TextFormField`
+  usage and points developers to your approved wrapper.
+- `avoid_hardcoded_color` — reports `Colors.*`, `Color(...)`,
+  `Color.fromARGB(...)`, and `Color.fromRGBO(...)` so UI colors come from
+  theme or design tokens.
 
-## Requirements
+Theme colors such as `Theme.of(context).colorScheme.primary` and custom token
+classes such as `AppColors` are allowed.
 
-- Flutter 3.38.0 or later
-- Dart 3.10.0 or later
+## Install
 
-## Installation
-
-Flutter Design Guard uses the official Dart Analyzer Plugin system.
-
-Enable the plugin in your `analysis_options.yaml`:
+Enable the official analyzer plugin and its diagnostics in
+`analysis_options.yaml`:
 
 ```yaml
 plugins:
-  flutter_design_guard: ^0.1.1
+  flutter_design_guard:
+    version: ^0.1.2
+    diagnostics:
+      avoid_native_text_field: true
+      avoid_hardcoded_color: true
 ```
 
-No changes to `pubspec.yaml` are required.
+No `pubspec.yaml` dependency or source import is required.
 
-## Configuration
+## Configure
 
-Create a file named:
-
-```text
-flutter_design_guard.yaml
-```
-
-Example:
+To customize their guidance, create `flutter_design_guard.yaml` at the project
+root:
 
 ```yaml
 rules:
   avoid_native_text_field:
-    replacement: CustomTextField
+    replacement: AppField
     implementation_paths:
-      - lib/core/widgets/custom_text_field.dart
+      - lib/design_system/app_field.dart
+  avoid_hardcoded_color:
+    replacement: AppColors
+    implementation_paths:
+      - lib/design_system/app_colors.dart
 ```
 
-### replacement
-
-The widget that should be used instead of Flutter's native text fields.
-
-### implementation_paths
-
-Project-relative paths where native `TextField` and `TextFormField` usage is allowed. This is typically the implementation file of your custom wrapper widget.
+`implementation_paths` are project-relative files where native widgets or
+hardcoded colors are allowed, typically the files that define your approved
+design-system abstractions.
 
 ## Example
 
-### ❌ Bad
-
 ```dart
+// Reported
 TextField();
-
 TextFormField();
+Container(color: Colors.red);
+final brand = Color(0xFF6750A4);
+
+// Approved
+AppField();
+Container(color: Theme.of(context).colorScheme.primary);
+Container(color: AppColors.brand);
 ```
 
-### ✅ Good
-
-```dart
-CustomTextField(
-  controller: controller,
-);
-```
-
-## Diagnostic
-
-Using `TextField` or `TextFormField` produces:
-
-```text
-warning • Do not use TextField directly. Use CustomTextField instead. • avoid_native_text_field
-```
-
-## Supported Commands
-
-The plugin runs automatically with:
-
-```bash
-flutter analyze
-```
-
-or
-
-```bash
-dart analyze
-```
+Run `dart analyze` or `flutter analyze`. See [the usage guide](doc/USAGE.md)
+for diagnostic configuration, exclusions, and troubleshooting.
 
 ## License
 

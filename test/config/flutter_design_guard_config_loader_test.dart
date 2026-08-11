@@ -27,6 +27,10 @@ rules:
     replacement: AppField
     implementation_paths:
       - lib/widgets/app_field.dart
+  avoid_hardcoded_color:
+    replacement: DesignColors
+    implementation_paths:
+      - lib/theme/design_colors.dart
 ''');
 
       final config = loader.load(resourceProvider.getFolder(packageRootPath));
@@ -35,6 +39,10 @@ rules:
       expect(config.avoidNativeTextField.implementationPaths, [
         'lib/widgets/app_field.dart',
       ]);
+      expect(config.avoidHardcodedColor.replacement, 'DesignColors');
+      expect(config.avoidHardcodedColor.implementationPaths, [
+        'lib/theme/design_colors.dart',
+      ]);
     });
 
     test('uses defaults when the configuration file is missing', () {
@@ -42,6 +50,8 @@ rules:
 
       expect(config.avoidNativeTextField.replacement, 'CustomTextField');
       expect(config.avoidNativeTextField.implementationPaths, isEmpty);
+      expect(config.avoidHardcodedColor.replacement, 'AppColors');
+      expect(config.avoidHardcodedColor.implementationPaths, isEmpty);
     });
 
     test('uses defaults when the YAML is invalid', () {
@@ -60,6 +70,8 @@ rules:
 
       expect(config.avoidNativeTextField.replacement, 'CustomTextField');
       expect(config.avoidNativeTextField.implementationPaths, isEmpty);
+      expect(config.avoidHardcodedColor.replacement, 'AppColors');
+      expect(config.avoidHardcodedColor.implementationPaths, isEmpty);
     });
   });
 }

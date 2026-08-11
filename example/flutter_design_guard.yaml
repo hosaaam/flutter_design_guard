@@ -1,3 +1,7 @@
 rules:
   avoid_native_text_field:
     replacement: AppField
+    implementation_paths:
+      - lib/widgets/app_field.dart
+  avoid_hardcoded_color:
+    replacement: Theme.of(context).colorScheme

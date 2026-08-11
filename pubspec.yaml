@@ -1,6 +1,6 @@
 name: flutter_design_guard
-description: Official Dart Analysis Server plugin for enforcing Flutter design-system rules. Configure it through analysis_options.yaml.
-version: 0.1.1
+description: Dart Analyzer plugin that enforces Flutter design-system widgets and colors.
+version: 0.1.2
 
 repository: https://github.com/hosaaam/flutter_design_guard
 issue_tracker: https://github.com/hosaaam/flutter_design_guard/issues

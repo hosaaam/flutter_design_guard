@@ -1,265 +1,124 @@
-# Flutter Design Guard Usage
+# Flutter Design Guard usage
 
-`flutter_design_guard` provides custom lint rules that help Flutter teams
-enforce their design system directly inside the IDE and CI.
-
-The package currently prevents direct usage of Flutter's native
-`TextField` and `TextFormField` widgets and recommends using
-`CustomTextField` instead.
+Flutter Design Guard runs as an official Dart Analyzer plugin. It reports
+design-system violations in supported IDEs and through `dart analyze` or
+`flutter analyze`.
 
 ## Installation
 
-Add `custom_lint` and `flutter_design_guard` to your application's
-`dev_dependencies`:
+Add the plugin to your application's `analysis_options.yaml`:
 
 ```yaml
-dev_dependencies:
-  custom_lint: ^0.8.1
-  flutter_design_guard: ^0.0.1
+include: package:flutter_lints/flutter.yaml
+
+plugins:
+  flutter_design_guard:
+    version: ^0.1.2
+    diagnostics:
+      avoid_native_text_field: true
+      avoid_hardcoded_color: true
 ```
 
-Then install the dependencies:
+No package dependency or Dart import is required. If diagnostics do not appear
+immediately, restart the Dart Analysis Server.
 
-```bash
-flutter pub get
-```
-
-`flutter_design_guard` is a development tool. You do not need to import it
-inside your Dart files.
-
-## Enable the plugin
-
-Add `custom_lint` to your application's `analysis_options.yaml`:
-
-```yaml
-analyzer:
-  plugins:
-    - custom_lint
-```
-
-All installed Flutter Design Guard rules are enabled by default.
-
-## Enable rules explicitly
-
-For better control, disable automatic rule activation and explicitly list
-the rules used by your project:
-
-```yaml
-analyzer:
-  plugins:
-    - custom_lint
-
-custom_lint:
-  enable_all_lint_rules: false
-  rules:
-    - avoid_native_text_field
-```
-
-## Available rules
+## Diagnostics
 
 ### `avoid_native_text_field`
 
-Reports a warning when Flutter's native `TextField` or `TextFormField`
-is used directly.
-
-Incorrect:
+Reports direct construction of Flutter Material's `TextField` and
+`TextFormField`. A local class with either name is not reported.
 
 ```dart
-import 'package:flutter/material.dart';
+// Reported
+TextField();
 
-class LoginForm extends StatelessWidget {
-  const LoginForm({super.key});
+TextFormField();
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(),
-        TextFormField(),
-      ],
-    );
-  }
-}
+// Approved design-system wrapper
+AppField();
 ```
 
-The analyzer reports:
+### `avoid_hardcoded_color`
 
-```text
-Do not use TextField or TextFormField directly.
-Use CustomTextField instead.
-
-avoid_native_text_field • WARNING
-```
-
-Correct:
+Reports Flutter palette values and direct `dart:ui` color construction:
 
 ```dart
-class LoginForm extends StatelessWidget {
-  const LoginForm({super.key});
+// Reported
+Colors.red;Colors.red.shade500;Color
+(0xFF6750A4);Color.fromARGB(255, 103, 80, 164);
+Color.fromRGBO(103, 80, 164, 1);
 
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        CustomTextField(),
-        CustomTextField(),
-      ],
-    );
-  }
-}
+// Approved
+Theme.of(context).colorScheme.primary;
+AppColors.brand;
 ```
 
-## IDE support
+## Configuration
 
-After installing the package, restart the Dart Analysis Server if the warning
-does not immediately appear.
-
-### Visual Studio Code
-
-Open the command palette and run:
-
-```text
-Dart: Restart Analysis Server
-```
-
-### Android Studio or IntelliJ IDEA
-
-Use:
-
-```text
-File → Invalidate Caches / Restart
-```
-
-## Command-line usage
-
-Run Flutter Design Guard from the root of your Flutter application:
-
-```bash
-dart run custom_lint
-```
-
-Example output:
-
-```text
-lib/login_form.dart:16:13
-Do not use TextField or TextFormField directly.
-Use CustomTextField instead.
-avoid_native_text_field • WARNING
-```
-
-Run the standard analyzer separately:
-
-```bash
-dart analyze
-dart run custom_lint
-```
-
-## CI usage
-
-Flutter Design Guard can be added to a continuous integration workflow.
-
-Example GitHub Actions steps:
+Create `flutter_design_guard.yaml` in the same directory as your package's
+`pubspec.yaml` to customize replacement messages or allow the implementation
+files behind your design system:
 
 ```yaml
-- name: Install dependencies
-  run: flutter pub get
-
-- name: Check formatting
-  run: dart format --output=none --set-exit-if-changed .
-
-- name: Run Dart analyzer
-  run: dart analyze
-
-- name: Run Flutter Design Guard
-  run: dart run custom_lint
+rules:
+  avoid_native_text_field:
+    replacement: AppField
+    implementation_paths:
+      - lib/design_system/app_field.dart
+  avoid_hardcoded_color:
+    replacement: AppColors
+    implementation_paths:
+      - lib/design_system/app_colors.dart
 ```
 
-The CI job fails when lint violations are found.
+- `replacement` is the name shown in the diagnostic and correction message.
+- `implementation_paths` contains project-relative file paths. Native text
+  fields or hardcoded colors are allowed only in those files.
 
-## Ignoring a warning
-
-Ignore a single violation:
-
-```dart
-// ignore: avoid_native_text_field
-final field = TextField();
-```
-
-Ignore the rule for an entire file:
-
-```dart
-// ignore_for_file: avoid_native_text_field
-```
-
-Ignoring rules should be limited to exceptional cases, such as implementing
-the approved design-system component itself.
-
-## Disable the rule
-
-Disable the rule for the entire project:
+Diagnostics are selected explicitly in `analysis_options.yaml`. Set a rule to
+`false` when you want to keep it disabled:
 
 ```yaml
-analyzer:
-  plugins:
-    - custom_lint
-
-custom_lint:
-  rules:
-    - avoid_native_text_field: false
+plugins:
+  flutter_design_guard:
+    version: ^0.1.2
+    diagnostics:
+      avoid_native_text_field: true
+      avoid_hardcoded_color: true
 ```
 
-## Troubleshooting
-
-### No warning appears in the IDE
-
-Verify that both packages are under `dev_dependencies`:
+For local package development, replace `version` with `path`:
 
 ```yaml
-dev_dependencies:
-  custom_lint: ^0.8.1
-  flutter_design_guard: ^0.0.1
+plugins:
+  flutter_design_guard:
+    path: ../flutter_design_guard
+    diagnostics:
+      avoid_native_text_field: true
+      avoid_hardcoded_color: true
 ```
 
-Verify that the plugin is enabled:
-
-```yaml
-analyzer:
-  plugins:
-    - custom_lint
-```
-
-Then run:
+## Running checks
 
 ```bash
-flutter pub get
-dart run custom_lint
+flutter analyze
 ```
 
-Restart the Dart Analysis Server afterward.
-
-### `dart analyze` reports no custom lint issues
-
-Flutter Design Guard rules are executed through `custom_lint`.
-
-Run:
-
-```bash
-dart run custom_lint
-```
-
-in addition to:
+or:
 
 ```bash
 dart analyze
 ```
 
-## Roadmap
+To suppress an exceptional violation, use Dart's standard diagnostic comments:
 
-Planned rules include:
+```dart
+// ignore: flutter_design_guard/avoid_hardcoded_color
+const legacyColor = Color(0xFF123456);
 
-- Preventing direct use of native Flutter buttons.
-- Preventing hardcoded colors outside theme definitions.
-- Enforcing application typography.
-- Enforcing design-system spacing and radius tokens.
-- Preventing direct use of native dialogs and snackbars.
-- Configurable widget replacements and excluded paths.
+// ignore_for_file: flutter_design_guard/avoid_native_text_field
+```
+
+Prefer `implementation_paths` for approved design-system implementation files;
+it documents the architectural boundary in one place.
